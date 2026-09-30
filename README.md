@@ -1,131 +1,90 @@
-# Veterinary Clinical Intelligence Platform — Architecture
+# Veterinary Clinical Intelligence Platform — Documentation
 
-Technically accurate, implementation-specific end-to-end architecture for the
-veterinary **Clinical Intelligence** platform: RAG grounding over PubMed Central,
-factual knowledge from 25–30 veterinary textbooks, SNOMED CT / VeNom / LOINC
-ontologies, species-specific pharmacology, deterministic citation verification,
-SOAP generation, and **DAT** (Directed-Acyclic-Tree) hierarchical parent→child→parent
-agent orchestration.
+A decision-support platform for **credentialed veterinarians**. A vet asks a real clinical question
+about a specific animal and receives a clear, **species-aware, fully cited** answer whose every claim
+can be opened to its source — and can optionally turn it into a reviewed SOAP note. It is **not** a
+general chatbot and **not** an autonomous veterinarian: it **retrieves and verifies real evidence
+before writing**, and **the vet always decides**.
 
-## ⭐ [`MASTER_PRD.md`](./MASTER_PRD.md) — Master PRD (Product Source of Truth)
+Built on: RAG grounding over PubMed Central, factual knowledge from 25–30 veterinary textbooks,
+SNOMED CT / VeNom / LOINC ontologies, species-specific pharmacology, deterministic citation
+verification, SOAP generation, and **DAT** (Directed-Acyclic-Tree) parent→child→parent agent
+orchestration.
 
-**Start here.** The consolidated, phase-wise Master PRD that governs every other document. Uses a
-stable OBJ→PR→UR→CAP→AC requirement hierarchy; evolves the product through seven phases (Foundation
-→ Knowledge → Core MVP → Clinical Validation & Sandbox → Pilot → Production & Scale → Continuous
-Improvement); defines the end-to-end clinical journey, clinical-AI behaviour, MVP/FUTURE boundary,
-cross-cutting product requirements, phase metrics, governance, a full traceability map, and its own
-change-management process. Supporting documents implement these requirements; they do not change
-product scope without an approved PRD change.
+> All specification documents live in [`PRD_Documents/`](./PRD_Documents/); rendered diagrams are in
+> [`output/`](./output/).
 
-## 📄 [`PRD.md`](./PRD.md) — Product Requirements Document (foundational input, consolidated into the Master PRD)
+> **Source-of-Truth Rule.** [`MASTER_PRD.md`](./PRD_Documents/MASTER_PRD.md) is the Product Source of
+> Truth. Every other document implements, deepens, tests, secures, or operates the requirements
+> defined there. **No document may change product scope or introduce new product behaviour without an
+> approved PRD change** (Master PRD §M).
 
-Industrial-standard PRD for the platform (Product / CTO / Eng / AI-ML / Clinical / UX / QA / Compliance):
-28 sections covering problem, personas, use cases, functional & AI/safety requirements
-(FR / NFR / AI / SAF / DP / UX IDs with acceptance criteria), DAT architecture, SOAP workflow,
-MVP vs future scope, roadmap, risks, and preserved open decisions. Grounded in `ARCHITECTURE.md`.
+---
 
-## 🚀 [`PRODUCTION_OPS_PLAN.md`](./PRODUCTION_OPS_PLAN.md) — Production, Monitoring & Continuous Improvement Plan
+## 📚 Document set (read in this order)
 
-How the platform is released, operated, monitored, and safely evolved: the production lifecycle
-(readiness→release→deploy→monitor→incident→resolve→re-validate) with responsibilities; three
-monitoring layers (technical / AI-ML / clinical safety); incident management incl. special handling
-when an AI response may contribute to a clinical-safety concern; release & change management by
-change type; knowledge/AI maintenance tracks; the veterinarian feedback loop (no direct changes to
-clinical behaviour); governance model; long-term evolution; and the readiness / monitoring /
-incident / change matrices, AI-knowledge update process, improvement loop, and open decisions.
-Releases and rollbacks operate on the whole versioned bundle.
+**Start with the Master PRD, then follow the product lifecycle.**
 
-## 🧪 [`TESTING_QA_STRATEGY.md`](./TESTING_QA_STRATEGY.md) — Testing & Quality Assurance Strategy
+| # | Document | What it is |
+|---|----------|------------|
+| ⭐ | [`MASTER_PRD.md`](./PRD_Documents/MASTER_PRD.md) | **Product Source of Truth.** Consolidated, phase-wise PRD with the stable OBJ→PR→UR→CAP→AC requirement hierarchy, seven-phase evolution, end-to-end journey, clinical-AI behaviour, MVP/FUTURE boundary, governance, traceability map, and change management. |
+| 1 | [`PRD.md`](./PRD_Documents/PRD.md) | Product Foundation & Requirements — 28 sections (personas, use cases, FR/NFR/AI/SAF/DP/UX requirements with acceptance criteria, roadmap, open decisions). Foundational input, consolidated into the Master PRD. |
+| 2 | [`ARCHITECTURE_SPEC.md`](./PRD_Documents/ARCHITECTURE_SPEC.md) | Clinical Intelligence System Architecture — requirements→component traceability, gaps/contradictions resolved, and 8 architecture views with per-component and per-connection detail. |
+| 3 | [`PRODUCT_FLOW_SPEC.md`](./PRD_Documents/PRODUCT_FLOW_SPEC.md) | User & System Interaction — 12 product flows (User action → System action → Decision → Next step → Result) + a full non-collapsed "cat with suspected kidney disease" sequence. |
+| 4 | [`VALIDATION_AND_BASELINE.md`](./PRD_Documents/VALIDATION_AND_BASELINE.md) | Consistency Validation + **Baseline Product Specification** — cross-review of docs 1–3, every issue classified, clinical chain + failure scenarios validated, recommended corrections, and the reconciled baseline. |
+| 5 | [`ENGINEERING_SPEC.md`](./PRD_Documents/ENGINEERING_SPEC.md) | Engineering & Technical Specification — 20 sections: components (with owners), DAT execution model, API surface (PROPOSED), data architecture, RAG engineering, model roles (TBD), NFRs, failure/recovery, traceability, decision register, MVP boundary. |
+| 6 | [`AI_ML_VALIDATION_SPEC.md`](./PRD_Documents/AI_ML_VALIDATION_SPEC.md) | AI/ML & Clinical Validation — evaluation framework (E-series), expert clinical validation, 10-scenario safety framework (S-series), datasets/versioning, lifecycle gates, monitoring, and validation matrices. |
+| 7 | [`SECURITY_SAFETY_SPEC.md`](./PRD_Documents/SECURITY_SAFETY_SPEC.md) | Security, Privacy & Clinical Safety — data classification, security/privacy model, AI clinical-safety architecture, defence-in-depth pipeline controls, incident/rollback process, risk register, production-readiness. |
+| 8 | [`BACKLOG_EXECUTION_PLAN.md`](./PRD_Documents/BACKLOG_EXECUTION_PLAN.md) | MVP Product Backlog & Execution Plan — 15 workstream epics (Epics→Features→stories→tasks, all traced), critical path, dependency-ordered sequence, DoR/DoD (stricter for clinical/AI), gate criteria. |
+| 9 | [`TESTING_QA_STRATEGY.md`](./PRD_Documents/TESTING_QA_STRATEGY.md) | Testing & QA Strategy — testing levels + environments, clinical test-case categories, defect/regression, Requirement→Test→…→Release traceability, QA/Clinical/AI-ML matrices, security coverage, release gates. |
+| 10 | [`PRODUCTION_OPS_PLAN.md`](./PRD_Documents/PRODUCTION_OPS_PLAN.md) | Production, Monitoring & Continuous Improvement — production lifecycle, three monitoring layers, incident management (incl. AI-clinical-safety handling), change management, feedback loop, governance, evolution. |
 
-How the platform is proven correct, clinically reliable, safe, and secure before release:
-testing scope by area; testing levels + environments; clinical test-case categories (normal, edge,
-ambiguous, incomplete, wrong species, conflicting/low evidence, pharmacology risk, hallucination,
-citation/system failure) with expert review; test data/ownership; defect severity + regression;
-Requirement→Test→Expected→Actual→Defect→Resolution→Release traceability; QA / Clinical / AI-ML
-test matrices; security test coverage; release gates; critical-defect handling; open testing gaps;
-and a production-readiness checklist. Clinical/AI features can't pass on engineering tests alone.
+### Reference material (diagrams)
+| Document | What it is |
+|----------|------------|
+| [`ARCHITECTURE.md`](./PRD_Documents/ARCHITECTURE.md) | The 5 Mermaid diagrams (High-Level, Low-Level + connection register, E2E flow, sequence, user flow). ⚠️ **See "Known open items" below — these predate the C-1 correction.** |
+| [`DIAGRAMS_EXPLAINED.md`](./PRD_Documents/DIAGRAMS_EXPLAINED.md) | Plain-English walkthrough of the high-level and low-level diagrams. |
+| [`output/out.md`](./output/out.md) + `output/out-*.svg` | Rendered SVG exports of the diagrams. |
 
-## 📋 [`BACKLOG_EXECUTION_PLAN.md`](./BACKLOG_EXECUTION_PLAN.md) — MVP Product Backlog & Execution Plan
+---
 
-The approved specs turned into executable work: MVP scope/boundaries, 15 workstream epics
-(Epics → Features → user stories → task clusters, each traced to a requirement with AC/owner/
-priority/deps), the cross-team critical path and what runs in parallel, a dependency-ordered
-execution sequence (no invented dates), Definition of Ready / Definition of Done (with a stricter
-DoD for clinical/AI features), and an MVP readiness checklist, critical dependencies, open
-decisions, risks, and gate entry criteria for Sandbox / Pilot / Production.
+## 🧭 Reading paths by role
 
-## 🔐 [`SECURITY_SAFETY_SPEC.md`](./SECURITY_SAFETY_SPEC.md) — Security, Privacy & Clinical Safety Specification
+- **New to the project / Leadership:** Master PRD → PRD (§1) → skim the diagrams.
+- **Product Manager:** Master PRD → Validation & Baseline (4) → Backlog (8).
+- **Engineer / Architect:** Master PRD → Architecture Spec (2) → Engineering Spec (5) → Backlog (8).
+- **AI/ML Engineer:** Master PRD → Architecture Spec (2) → AI/ML & Clinical Validation (6).
+- **Clinical Lead:** Master PRD → Product Flow (3) → AI/ML & Clinical Validation (6) → Security & Safety (7).
+- **QA Lead:** Master PRD → Testing & QA (9) → Engineering Spec (5) §17.
+- **Security / Compliance:** Master PRD → Security & Safety (7) → Production & Ops (10).
+- **DevOps / SRE:** Master PRD → Engineering Spec (5) §14 → Production & Ops (10).
 
-The controls that protect vets, patients, clinical data, knowledge sources, and AI outputs:
-data classification; the security/privacy model (authn/z, vet verification, RBAC, encryption,
-secrets, API security, audit, retention/deletion, environment isolation, incident handling);
-the AI clinical-safety architecture (when to communicate uncertainty / refuse / request info /
-require human review); defence-in-depth safety controls at every pipeline stage; environment
-safety gates + unified incident/rollback/re-validation process; Risk→Control→…→Monitoring
-traceability; a risk register; open decisions; and production-readiness + approval criteria.
+---
 
-## 🔬 [`AI_ML_VALIDATION_SPEC.md`](./AI_ML_VALIDATION_SPEC.md) — AI/ML & Clinical Validation Specification
+## 🎯 Design rules honored across all documents
 
-How the AI system is developed, evaluated, clinically validated, safety-tested, and approved before
-clinical use: component + pipeline evaluation framework (retrieval, faithfulness, hallucination,
-species, pharmacology, DAT, SOAP), an expert-driven clinical validation process, a 10-scenario
-safety framework (with zero-tolerance set), dataset/versioning and re-eval triggers, a
-Development→…→Production lifecycle with gates, post-production monitoring, full traceability, and
-AI/ML + clinical + safety validation matrices with Sandbox/Pilot/Production approval criteria.
-Thresholds marked TBD; consistent with the corrected Baseline.
-
-## 🛠️ [`ENGINEERING_SPEC.md`](./ENGINEERING_SPEC.md) — Engineering & Technical Specification
-
-Engineering-ready translation of the approved Baseline: 20 sections covering system scope,
-components (with owners), end-to-end runtime flow, DAT execution model, API surface (all PROPOSED),
-data architecture, RAG engineering, model roles (all MODEL — TBD), clinical safety controls,
-security/privacy, observability, measurable NFRs, failure/recovery, environments, integrations,
-requirement traceability, Given/When/Then acceptance criteria, decision register, risks, and the
-final MUST/SHOULD/NOT-IN-MVP/FUTURE boundary. Nothing invented.
-
-## ✅ [`VALIDATION_AND_BASELINE.md`](./VALIDATION_AND_BASELINE.md) — Consistency Validation + Baseline
-
-Cross-review of the PRD, architecture, and flow specs as one product specification: every
-inconsistency classified (CONTRADICTION / MISSING / DUPLICATE / UNCLEAR / DECISION REQUIRED — TBD /
-FUTURE / CORRECT), the full clinical query chain and 10 failure scenarios validated link by link,
-recommended corrections (source docs left unmodified), and a consolidated BASELINE PRODUCT
-SPECIFICATION — the pre-engineering source of truth.
-
-## 🔄 [`PRODUCT_FLOW_SPEC.md`](./PRODUCT_FLOW_SPEC.md) — Product Flow Specification
-
-The 12 product flows (primary user, new query, patient context, evidence retrieval, DAT execution,
-specialist consultation, citation verification, low/no-evidence, follow-up, SOAP, human review,
-error/failure), each written as User action → System action → Decision → Next step → User-visible
-result, plus a full non-collapsed sequence diagram for "cat with suspected kidney disease."
-Consistent with `PRD.md` and `ARCHITECTURE_SPEC.md`.
-
-## 🏗️ [`ARCHITECTURE_SPEC.md`](./ARCHITECTURE_SPEC.md) — Architecture Specification
-
-Requirements-validated architecture derived from `PRD.md`: a traceability matrix (every PRD
-requirement mapped to a component), the gaps and contradictions found and how each is resolved,
-and 8 architecture views (High-Level, Low-Level, DAT Agent, Offline Ingestion, Online Query,
-SOAP, Security & Trust, External Integration) with per-component and per-connection detail.
-Every element labelled CONFIRMED / PROPOSED / FUTURE; nothing invented.
-
-## 📐 [`ARCHITECTURE.md`](./ARCHITECTURE.md) — the 5 diagrams
-
-All diagrams are **Mermaid** (render natively on GitHub) and were validated with
-`@mermaid-js/mermaid-cli`.
-
-1. **High-Level Architecture** — layered User → API → Orchestrator → DAT → Knowledge → Stores → Models → Safety → Output.
-2. **Low-Level / Detailed Architecture** — every connection labelled (protocol, request/response payload, sync/async, auth boundary, retrieval mechanism, model invocation, store accessed) plus a full connection register table.
-3. **E2E System Flow** — two distinct flows: **(A) offline knowledge ingestion** (dashed) and **(B) online clinical query** (solid).
-4. **Sequential Diagram** — chronological trace for *"likely causes and recommended diagnostic approach for kidney disease in a cat"*.
-5. **Veterinarian User Flow** — login → query → understand → retrieve → DAT → synthesize → cited answer → review → SOAP → export (FUTURE).
-
-## Design rules honored
-
-- **DAT, not a mesh.** True Directed Acyclic Tree — one Root/Router parent; children run in parallel; **only** parent↔child communication; each child returns structured `{evidence, source_ids, confidence, metadata}`; synthesis runs **after** retrieval.
+- **DAT, not a mesh.** One Root/Router parent; children run in parallel; **only** parent↔child communication; each child returns structured `{evidence, source_ids, confidence, metadata}`; synthesis runs **after** retrieval.
+- **Verify before generate.** Deterministic citation verification is a **post-synthesis gate** (not a DAT child); the safety/verification layer **fails closed** — it blocks generation rather than passing an unverified answer.
 - **LLM is not the knowledge source.** It generates over retrieved, citation-verified, safety-grounded context only.
-- **No invented specifics.** Undefined endpoints/models/technologies are marked `PROPOSED` / `MODEL TBD` / `TECHNOLOGY TBD`; future integrations (PMS/EHR) marked `FUTURE`.
+- **Species is a safety property.** Carried end-to-end; no drug dose without a confirmed species; a missing species entry returns "no data," never a substitute.
+- **The vet decides.** The product supports judgment and never saves a clinical record without human review.
+- **No invented specifics.** Undefined endpoints/models/technologies are marked `PROPOSED` / `MODEL TBD` / `TECHNOLOGY TBD`; deferred work is marked `FUTURE`.
 - **Data stores shown separately** — Textbook KG, PMC Vector Index, Ontology Store, Pharmacology DB, Citation/Evidence Store, Patient/Context Store, Agent State/Execution Store, Audit/Observability Store.
 
-> Diagrams render inline on GitHub. To export images locally:
-> `npx -y @mermaid-js/mermaid-cli -i ARCHITECTURE.md -o out.md`
-#   C l i n i c a l _ A s s i g n m e n t  
- 
+---
+
+## ⚠️ Known open items
+
+- **Applied corrections:** C-1 (verification is a post-synthesis gate + Provenance Capture child), C-2 (response contract `{answer, citations[], confidence, flags[]}`), and C-3 (DAT routing contract) are applied to the source docs. **C-5..C-9 remain open** (tracked in [`VALIDATION_AND_BASELINE.md`](./PRD_Documents/VALIDATION_AND_BASELINE.md) §11).
+- **Reference-diagram drift:** [`ARCHITECTURE.md`](./PRD_Documents/ARCHITECTURE.md), [`output/out.md`](./output/out.md), and the `output/out-*.svg` files still render citation verification as a **DAT child** (the pre-C-1 picture). They should be regenerated to match the Master PRD before engineering relies on them.
+- **Decisions pending:** all `DECISION REQUIRED — TBD` items (models, vector DB, orchestration runtime, cloud, auth mechanism, vet verification, regulatory scope, evaluation thresholds, clinical panel) are consolidated in Master PRD §J. They gate the work that depends on them.
+
+---
+
+## 🛠️ Regenerating the diagrams
+
+Diagrams render inline on GitHub. To export images locally:
+
+```bash
+npx -y @mermaid-js/mermaid-cli -i PRD_Documents/ARCHITECTURE.md -o output/out.md
+```

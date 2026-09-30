@@ -93,8 +93,8 @@ flowchart LR
     ONTA["Ontology / Concept Agent"]:::dat
     PH["Pharmacology Agent"]:::dat
     SPS["Specialist Agents<br/>Internal Medicine · Oncology · Anesthesia · Dentistry"]:::dat
-    EVC["Evidence / Citation Verification Agent"]:::dat
-    ROOT --> CR & LIT & ONTA & PH & SPS & EVC
+    PROV["Provenance Capture Agent<br/>records source_id ↔ span"]:::dat
+    ROOT --> CR & LIT & ONTA & PH & SPS & PROV
   end
 
   subgraph SYN["5 · EVIDENCE / SYNTHESIS"]
@@ -161,7 +161,7 @@ flowchart LR
   VIDX ==> RANK
   RRK -. scores .- RANK
   RANK ==> SSYN ==> PSYN
-  EVC ==> CVER
+  PROV -. writes .- CES
   PSYN ==> CVER ==> SGRD ==> LLM ==> ANS ==> SOAP -.-> EXP
 
   %% models used by orchestrator/agents
@@ -238,7 +238,7 @@ flowchart LR
         ANE["Anesthesia"]:::dat
         DEN["Dentistry"]:::dat
       end
-      EVC["Evidence / Citation<br/>Verification Agent<br/>verify_citations()"]:::dat
+      PROV["Provenance Capture Agent<br/>capture_provenance()<br/>source_id ↔ span"]:::dat
     end
 
     %% parent -> child (fan-out, async task dispatch)
@@ -247,7 +247,7 @@ flowchart LR
     ROOT ==>|"dispatch · async"| ONTA
     ROOT ==>|"dispatch · async"| PH
     ROOT ==>|"dispatch · async"| SPS
-    ROOT ==>|"dispatch · async"| EVC
+    ROOT ==>|"dispatch · async"| PROV
 
     %% child -> parent (structured return)
     CR  ==>|"return {evidence[], source_ids[], confidence, metadata}"| ROOT
@@ -255,7 +255,7 @@ flowchart LR
     ONTA ==>|"return {codes[], concept_ids[], confidence}"| ROOT
     PH  ==>|"return {drugs[], dosing, interactions[], source_ids[]}"| ROOT
     SPS ==>|"return {specialist_findings[], source_ids[], confidence}"| ROOT
-    EVC ==>|"return {verified[], unverified[], grounding_flags[]}"| ROOT
+    PROV ==>|"return {provenance_written, source_ids[]}"| ROOT
   end
 
   %% ============ RETRIEVAL + STORES ============
@@ -442,7 +442,7 @@ flowchart LR
     GW["API Gateway + Auth<br/>POST /api/v1/clinical/query [PROPOSED]"]:::api
     ORCH2["Orchestrator<br/>Query Understanding · Species Detection ·<br/>Concept Mapping · Decomposition"]:::orch
     ROOT2["DAT Root / Router Agent"]:::dat
-    CH2["Parallel child agents<br/>Reasoning · PMC Retrieval · Ontology ·<br/>Pharmacology · Specialists · Citation‑Verify"]:::dat
+    CH2["Parallel child agents<br/>Reasoning · PMC Retrieval · Ontology ·<br/>Pharmacology · Specialists · Provenance Capture"]:::dat
     RANK2["Evidence ranking / re‑ranking"]:::orch
     SYN2["Specialist → Parent synthesis"]:::orch
     VER2["Citation verify + Safety/Grounding"]:::safety

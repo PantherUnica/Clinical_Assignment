@@ -51,7 +51,7 @@ It works like a hospital team:
   - **Pharmacology Agent** — handles drugs and doses.
   - **Specialist Agents** — expert "avatars": Internal Medicine, Oncology (cancer),
     Anesthesia, Dentistry.
-  - **Evidence / Citation Verification Agent** — checks the sources are real.
+  - **Provenance Capture Agent** — records exactly where each retrieved fact came from (source → passage), so it can be checked later. (The actual **citation verification** is a separate, deterministic step that runs **after** the team reports back — see Part 2, step 7 — not one of the parallel helpers.)
 
 **Key rule:** helpers only talk to the **leader**, never to each other. Each helper finishes
 its task and **reports back to the leader** with its findings, its **sources**, and a
