@@ -289,7 +289,7 @@ Single view of decisions from across the set (detail in each source doc). None m
 
 Per the Source-of-Truth Rule, unresolved items are surfaced, not papered over:
 - **Corrections C-1/C-2/C-3 are applied** to the source docs (verification gate; response contract; routing contract). **C-5..C-9 remain open** in the source docs (specialist-disagreement wording, explicit fail-closed in the flow doc, intent-ambiguity decision, freshness-display, and extra PRD requirement lines) — tracked in [`VALIDATION_AND_BASELINE.md`](./VALIDATION_AND_BASELINE.md) §11; this Master PRD already states the *intended* behaviour for each.
-- **Reference diagrams drift:** [`ARCHITECTURE.md`](./ARCHITECTURE.md) / `out.md` / `out-*.svg` still render citation verification as a DAT child (pre-C-1). They should be regenerated to match this PRD before engineering relies on them.
+- **Reference diagrams:** [`ARCHITECTURE.md`](./ARCHITECTURE.md) and the rendered `output/out.md` / `out-*.svg` have been regenerated for C-1 (verification as a post-synthesis gate; Provenance Capture as the DAT child) and now match this PRD.
 - All `DECISION REQUIRED` items in §J are unresolved by definition and gate the work that needs them.
 
 ---

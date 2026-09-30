@@ -42,7 +42,7 @@ orchestration.
 ### Reference material (diagrams)
 | Document | What it is |
 |----------|------------|
-| [`ARCHITECTURE.md`](./PRD_Documents/ARCHITECTURE.md) | The 5 Mermaid diagrams (High-Level, Low-Level + connection register, E2E flow, sequence, user flow). ⚠️ **See "Known open items" below — these predate the C-1 correction.** |
+| [`ARCHITECTURE.md`](./PRD_Documents/ARCHITECTURE.md) | The 5 Mermaid diagrams (High-Level, Low-Level + connection register, E2E flow, sequence, user flow). Updated for correction C-1 (verification is a post-synthesis gate; the DAT child is Provenance Capture). |
 | [`DIAGRAMS_EXPLAINED.md`](./PRD_Documents/DIAGRAMS_EXPLAINED.md) | Plain-English walkthrough of the high-level and low-level diagrams. |
 | [`output/out.md`](./output/out.md) + `output/out-*.svg` | Rendered SVG exports of the diagrams. |
 
@@ -76,7 +76,7 @@ orchestration.
 ## ⚠️ Known open items
 
 - **Applied corrections:** C-1 (verification is a post-synthesis gate + Provenance Capture child), C-2 (response contract `{answer, citations[], confidence, flags[]}`), and C-3 (DAT routing contract) are applied to the source docs. **C-5..C-9 remain open** (tracked in [`VALIDATION_AND_BASELINE.md`](./PRD_Documents/VALIDATION_AND_BASELINE.md) §11).
-- **Reference-diagram drift:** [`ARCHITECTURE.md`](./PRD_Documents/ARCHITECTURE.md), [`output/out.md`](./output/out.md), and the `output/out-*.svg` files still render citation verification as a **DAT child** (the pre-C-1 picture). They should be regenerated to match the Master PRD before engineering relies on them.
+- **Reference diagrams:** [`ARCHITECTURE.md`](./PRD_Documents/ARCHITECTURE.md), [`output/out.md`](./output/out.md), and the `output/out-*.svg` files have been regenerated for correction C-1 (verification shown as a post-synthesis gate; Provenance Capture as the DAT child), so they now match the Master PRD.
 - **Decisions pending:** all `DECISION REQUIRED — TBD` items (models, vector DB, orchestration runtime, cloud, auth mechanism, vet verification, regulatory scope, evaluation thresholds, clinical panel) are consolidated in Master PRD §J. They gate the work that depends on them.
 
 ---
