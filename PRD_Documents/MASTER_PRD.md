@@ -21,7 +21,7 @@ A decision-support platform for **credentialed veterinarians**. A vet asks a rea
 1. **Evidence before words** — the AI writes only over retrieved, verified evidence; nothing unsupported reaches the vet.
 2. **The vet decides** — the product supports judgment, never replaces it, and never saves a clinical record without human review.
 
-**Primary users:** general-practice vet (primary), referral/specialist vet, early-career vet, and a clinical-governance/practice lead (oversight). Full personas in [`PRD.md`](./PRD.md) §3.
+**User segments (PRD §3.1):** the product recognises three — **(1) Vet Doctors (credentialed veterinarians) — CONFIRMED**, the user the MVP is built for; **(2) Vet Nurses & Technicians** and **(3) Vet Students** — both **PROPOSED / `DECISION REQUIRED`**, because they are *not* credentialed vets and admitting them changes the "credentialed-vet-only" access rule (FR-001) and the "vet decides" framing (they would need a separate role/permissions, and students likely a distinct "learning mode"). Detailed personas and each segment's plain-English pain points are in [`PRD.md`](./PRD.md) §3.
 
 ---
 
@@ -259,6 +259,7 @@ Single view of decisions from across the set (detail in each source doc). None m
 
 - **DECISION REQUIRED (blocking build):** Foundation LLM, embedding/re-ranker (D-2/D-7); vector DB, KG engine, pharmacology DB+source (D-3/4/5); DAT routing mechanism (D-1); auth mechanism + vet verification (SD-1/2); source licences (D-11).
 - **DECISION REQUIRED (blocking gates):** thresholds incl. faithfulness gate (VD-1/OQ-13); clinical panel + case volumes (VD-2); validation/pilot data policy (VD-3/SD-8); confirm V1 specialist = IM (OQ-9); intent-ambiguity handling (D-4).
+- **DECISION REQUIRED (user scope):** **UD-1** — whether **Vet Nurses/Technicians** and **Vet Students** (PRD §3.1 Segments 2 & 3) may use the platform. They are not credentialed vets, so this changes the credentialed-vet-only access rule (FR-001) and needs separate roles/permissions (nurses/techs) and a possible "learning mode" (students). MVP remains **Segment 1 (Vet Doctors) only** until decided.
 - **DECISION REQUIRED (blocking production):** regulatory scope + retention/residency (D-10); encryption-at-rest specifics (SD-4); audit retention (SD-7); incident SLA/owners (SD-10/PD-3); governance owners (PD-7); deployment strategy + monitoring thresholds (PD-1/PD-2).
 - **PROPOSED:** all API paths; the gap-closing components (Scope Guardrail, Clarification Gate, Uncertainty Aggregation, Provenance Capture, degradation policy, edit-provenance).
 - **CONFIRMED:** the two governing rules; DAT topology; verification-as-gate; species/drug safety; fail-closed; human review; store separation; auditability; MVP boundary.

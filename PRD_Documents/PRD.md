@@ -35,6 +35,37 @@ The problem this product solves is therefore not "answer veterinary questions." 
 
 The primary user is always a **credentialed veterinary professional**. The platform is a professional clinical tool, not a consumer pet-health product, and its guardrails assume a qualified user in the loop.
 
+### 3.1 · Primary user segments (with pain points, in simple words)
+
+We recognise **three user segments**. **Segment 1 (Vet Doctors) is the CONFIRMED user the MVP is built for.** Segments 2 and 3 are valuable but are **not credentialed veterinarians**, so allowing them to use the platform is a **`DECISION REQUIRED`** product-scope change — it affects the "credentialed-vet-only" access rule (FR-001, vet verification) and the "the vet decides" safety framing. They are written here so the decision is made **on purpose, not by accident**.
+
+**Segment 1 — Vet Doctors (credentialed veterinarians) — CONFIRMED.**
+The qualified animal doctor who asks the clinical question and makes the decision. Their pains, in simple words:
+- **"I have no time."** — needs a fast answer between patients.
+- **"I can't trust an answer I can't check."** — needs to open the real source behind every claim.
+- **"The answer must be right for THIS animal."** — a dose that is safe for a dog can harm a cat.
+- **"Don't sound sure when you're not."** — needs an honest "limited evidence" instead of a confident guess.
+- **"Give me the record too."** — needs a SOAP note without extra typing.
+- **"Help me decide, don't decide for me."** — the vet stays in control.
+
+**Segment 2 — Vet Nurses & Technicians — PROPOSED (`DECISION REQUIRED`).**
+The person who prepares and gives drugs, monitors patients, and talks to owners, working under a vet's direction. Their pains, in simple words:
+- **"A dosing mistake is easy to make and dangerous."** — needs a safe dose double-check.
+- **"I need the how-to fast during a busy shift."** — needs quick protocol lookups.
+- **"I have to explain things to worried owners."** — needs simple, correct explanations to pass on.
+- **"I can't step outside my role."** — the tool must support the vet's decision, never replace the vet.
+- *Scope note:* nurses/techs are **not credentialed vets** → this needs a **separate user role** with its own permissions and a stronger "confirm with your vet" framing.
+
+**Segment 3 — Vet Students — PROPOSED (`DECISION REQUIRED`).**
+Someone still training, using the platform to learn. Their pains, in simple words:
+- **"There's too much to read and I don't know what to trust."** — needs trusted, sourced answers.
+- **"I learn best when I can see WHY."** — the citations teach, not just prove.
+- **"I want to practise thinking like a vet, safely."** — a place to build clinical reasoning.
+- **"I might lean on it too much."** — needs framing that builds judgment, not dependence.
+- *Scope note:* students are **not licensed** → this likely means a separate **"learning mode"** with a different, deliberate safety posture.
+
+**How the segments map to the detailed personas below:** Segment 1 = Personas A, B, C (all vets), with Persona D as oversight. Segments 2 and 3 are the proposed new user types above. The detailed personas expand Segment 1:
+
 **Persona A — Dr. Priya, General Practice Veterinarian (primary persona).**
 Sees 20–30 patients a day across dogs, cats, and the occasional exotic. Time-poor, broad rather than deep, and personally liable for every clinical decision. She needs a fast second opinion she can defend: a differential list, a sensible diagnostic order, and a species-correct dose — each with a source she can open. She will abandon any tool that is slow, that she cannot trust, or that cannot produce a usable record afterward.
 
