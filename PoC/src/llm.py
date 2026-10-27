@@ -39,7 +39,12 @@ def _complete_openai(system: str, prompt: str, json_mode: bool) -> str:
             raise RuntimeError(
                 "OPENAI_API_KEY is not set. Copy PoC/.env.example to PoC/.env and add your key."
             )
-        _openai_client = OpenAI(api_key=config.OPENAI_API_KEY)
+        # Generation runs long, so it gets a longer timeout than embedding.
+        _openai_client = OpenAI(
+            api_key=config.OPENAI_API_KEY,
+            max_retries=config.API_MAX_RETRIES,
+            timeout=config.API_TIMEOUT_SECONDS * 3,
+        )
 
     kwargs = {
         "model": config.OPENAI_MODEL,

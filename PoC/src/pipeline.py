@@ -10,6 +10,7 @@ inspectable - which is the point of the PoC.
 from __future__ import annotations
 
 import time
+from typing import Callable
 
 import config
 
@@ -23,14 +24,28 @@ def answer_question(
     question: str,
     top_k: int | None = None,
     threshold: float | None = None,
+    on_stage: Callable[[str], None] | None = None,
 ) -> dict:
-    started = time.time()
+    """Run the pipeline end to end.
 
+    `on_stage` is called with a label as each stage begins, so a UI can report
+    progress - a full run takes tens of seconds and is otherwise opaque.
+    """
+    started = time.time()
+    report = on_stage or (lambda _label: None)
+
+    report("Retrieving passages from the books")
     passages = retrieve_stage.retrieve(question, top_k=top_k)
+
+    report(f"Reading {len(passages)} passages and extracting claims")
     synthesis = synthesize_stage.synthesize(question, passages)
+
+    report(f"Verifying {len(synthesis['claims'])} claims against their sources")
     verdict = verify_stage.verify_claims(
         synthesis["claims"], passages, threshold=threshold
     )
+
+    report(f"Writing the answer from {len(verdict['verified'])} verified claims")
     written = generate_stage.generate(question, verdict["verified"], passages)
 
     return {

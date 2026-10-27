@@ -21,7 +21,12 @@ def _openai():
             raise RuntimeError(
                 "OPENAI_API_KEY is not set. Copy PoC/.env.example to PoC/.env and add your key."
             )
-        _openai_client = OpenAI(api_key=config.OPENAI_API_KEY)
+        # Retry transient connection blips rather than surfacing them as failures.
+        _openai_client = OpenAI(
+            api_key=config.OPENAI_API_KEY,
+            max_retries=config.API_MAX_RETRIES,
+            timeout=config.API_TIMEOUT_SECONDS,
+        )
     return _openai_client
 
 

@@ -30,6 +30,10 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 # Generous because on gpt-5.x reasoning tokens are drawn from this same budget.
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "6000"))
 
+# Transient connection blips should be retried, not surfaced as a failure.
+API_MAX_RETRIES = int(os.getenv("API_MAX_RETRIES", "5"))
+API_TIMEOUT_SECONDS = float(os.getenv("API_TIMEOUT_SECONDS", "60"))
+
 # --- Embeddings (retrieval) ---
 EMBED_PROVIDER = os.getenv("EMBED_PROVIDER", "openai").strip().lower()
 OPENAI_EMBED_MODEL = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")

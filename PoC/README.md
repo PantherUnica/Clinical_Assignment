@@ -50,8 +50,13 @@ jupyter notebook notebooks/vetai_poc_walkthrough.ipynb
 **Streamlit** - the demo UI with clickable citations:
 
 ```bash
-streamlit run app/streamlit_app.py
+python -m streamlit run app/streamlit_app.py
 ```
+
+Use `python -m streamlit`, not bare `streamlit` - pip installs its script outside PATH on
+Windows. **Run only one instance**, and open the URL the terminal prints: if port 8501 is
+already in use Streamlit moves to 8502 without making much noise about it, so a remembered
+URL can leave you looking at a different (older) copy of the app.
 
 **CLI** - quickest sanity check:
 
@@ -202,6 +207,17 @@ then set `OPENAI_MODEL` in `.env` to one of those.
 `LLM_MAX_TOKENS`. Raise it (6000 is the default here).
 
 **`The vector index is empty`** - run `python -m src.embed_index`.
+
+**`'streamlit' is not recognized`** - use `python -m streamlit run app/streamlit_app.py`.
+
+**The app looks like an older version, or two apps disagree** - you probably have more than
+one instance running and are viewing the wrong port. Check with
+`netstat -ano | findstr 850`, stop the extras, and use the URL your terminal prints.
+
+**A red error box in the browser** - the message now names the cause and the fix (model
+access, missing key, network, rate limit, empty index). Transient network failures are
+retried `API_MAX_RETRIES` times before being reported, so a red box means it genuinely could
+not complete - read the second line for what to do.
 
 **Everything is dropped as `unsupported_by_source`** - lower `VERIFY_THRESHOLD` a little, or
 check the retrieved passages in the notebook to see whether retrieval found the right pages
