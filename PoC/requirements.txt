@@ -1,0 +1,14 @@
+openai>=1.40.0
+tiktoken>=0.7.0
+pymupdf>=1.24.0
+chromadb>=0.5.0
+streamlit>=1.36.0
+python-dotenv>=1.0.0
+numpy>=1.26.0
+jupyter>=1.0.0
+
+# Optional - only needed if you switch providers in config.py / .env
+# anthropic>=0.40.0            # LLM_PROVIDER=claude
+# sentence-transformers>=3.0.0 # EMBED_PROVIDER=local
+# pytesseract>=0.3.10          # OCR fallback for scanned pages
+# pillow>=10.0.0               # required by pytesseract
