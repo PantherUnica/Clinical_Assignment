@@ -37,6 +37,23 @@ def answer_question(
 
     report("Retrieving passages from the books")
     passages = retrieve_stage.retrieve(question, top_k=top_k, max_per_book=max_per_book)
+    return answer_from_passages(question, passages, threshold=threshold, on_stage=on_stage, started=started)
+
+
+def answer_from_passages(
+    question: str,
+    passages: list[dict],
+    threshold: float | None = None,
+    on_stage: Callable[[str], None] | None = None,
+    started: float | None = None,
+) -> dict:
+    """synthesize -> verify -> generate over passages the caller already has.
+
+    Used by answer_question (after retrieval) and by evaluation runs that must
+    give every model exactly the same frozen passages.
+    """
+    started = time.time() if started is None else started
+    report = on_stage or (lambda _label: None)
 
     report(f"Reading {len(passages)} passages and extracting claims")
     synthesis = synthesize_stage.synthesize(question, passages)

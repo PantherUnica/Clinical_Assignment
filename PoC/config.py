@@ -47,6 +47,15 @@ LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "6000"))
 API_MAX_RETRIES = int(os.getenv("API_MAX_RETRIES", "5"))
 API_TIMEOUT_SECONDS = float(os.getenv("API_TIMEOUT_SECONDS", "60"))
 
+# USD per 1M tokens (input, output), for eval cost reporting only.
+# Source: OpenAI pricing/model pages (developers.openai.com), checked 2026-11-19.
+# Reasoning tokens are billed as output. Update here if prices change.
+LLM_PRICES = {
+    "gpt-5.5": (5.00, 30.00),
+    "gpt-5-mini": (0.25, 2.00),
+    "gpt-4o-mini": (0.15, 0.60),
+}
+
 # --- Embeddings (retrieval) ---
 EMBED_PROVIDER = os.getenv("EMBED_PROVIDER", "openai").strip().lower()
 OPENAI_EMBED_MODEL = os.getenv("OPENAI_EMBED_MODEL", "text-embedding-3-small")
