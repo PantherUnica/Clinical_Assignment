@@ -229,6 +229,86 @@ def build_spotcheck(model: str, n: int = 30, seed: int = 7) -> str:
     return "\n".join(L) + "\n"
 
 
+TYPE_LABEL = {
+    "two_book": "needs 2 books", "three_book": "needs 3 books", "conflict": "books disagree",
+    "single_book": "single book", "unanswerable": "not in the books",
+}
+
+
+def _flatten_headings(text: str) -> str:
+    """Keep an answer's structure without breaking the file's headings: '### X' -> '**X**'."""
+    import re
+
+    return re.sub(r"^#{1,6}\s+(.+)$", r"**\1**", text, flags=re.M)
+
+
+def build_qa_md(model: str) -> str:
+    """Same layout as the per-book *_100_QA_results.md files, for the 40 multi-book questions."""
+    from src import library
+
+    titles = {b["book_id"]: b["title"] for b in library.load_manifest()}
+    items = load_run(model)
+    qs = sorted(load_questions(), key=lambda q: int(q["id"].split("-")[1]))
+    name = model.split(":", 1)[-1]
+    L = [
+        f"# All 17 books (multi-book test set): AI-generated answers vs. book answers — {name}",
+        "",
+        "40 questions written from the 17 indexed books (paraphrased, never shown to the answering model). "
+        'The "Book answer" lists the key facts from the answer key, each with the book and page it comes from '
+        "(see `eval/multibook/questions_review.md`). The \"AI answer\" and \"Citation(s)\" were produced by the "
+        f"VetAI pipeline (retrieve -> synthesize -> verify -> generate) with `{model}`, over the full 17-book index "
+        "(exact retrieval, top-6 passages, max 2 per book). \"Score\" is from two blind judges "
+        "(gpt-5-mini and gpt-5.5); note gpt-5-mini is also the answering model here.",
+        "",
+        f"Question types: needs 2 books (14), needs 3 books (10), books disagree (5), not in the books (6), "
+        f"single book (5). Split: dev = used to choose settings, test = held out.",
+        "",
+    ]
+    for q in qs:
+        n = int(q["id"].split("-")[1])
+        L += [f"**{n}. {q['question']}**", f"_[{TYPE_LABEL[q['type']]} · {q['split']} · {q['id']}]_", ""]
+        if q["type"] == "unanswerable":
+            book = ("Not covered by any of the 17 books - the right answer is to say so. "
+                    f"(Checked: {', '.join(q['absent_terms'])} appear on no page of any book.)")
+        else:
+            parts = []
+            for f in q["key_facts"]:
+                page = f"p. {f['printed_page']}" if f["printed_page"] else f"PDF p. {f['pdf_page']}"
+                parts.append(f"{f['fact']} ({titles.get(f['book_id'], f['book_id'])}, {page})")
+            book = " ".join(parts)
+            if q.get("conflict"):
+                book += f" **Disagreement:** {q['conflict']}"
+        L += [f"**Book answer:** {book}", ""]
+        it = items.get(q["id"])
+        if it is None:
+            L += ["**AI answer:** (not run)", "", "**Citation(s):** none", ""]
+            continue
+        a = it["answer"]
+        answer = _flatten_headings(a["answer"].strip())
+        if not a["grounded"]:
+            answer = f'No supported answer. "{answer}"'
+        L += [f"**AI answer:** {answer}", ""]
+        cites = "; ".join(f"[{c['marker']}] {c['label']}" for c in a["citations"]) if a["citations"] else \
+            "none (no claim cleared the verification gate)"
+        L += [f"**Citation(s):** {cites}", ""]
+        js = it["judges"]
+        small, big = js.get(JUDGE_SMALL, {}), js.get(JUDGE_BIG, {})
+
+        def s(j):
+            if not j:
+                return "—"
+            fr = "" if j.get("fact_recall") is None else f", facts {_pct(j['fact_recall'])}"
+            return f"{j.get('overall')}/5{fr}"
+
+        reason = (big.get("reason") or "").strip()
+        L += [f"**Score:** gpt-5-mini judge {s(small)} · gpt-5.5 judge {s(big)} — {reason}", ""]
+    return "\n".join(L) + "\n"
+
+
+def model_tag_short(model: str) -> str:
+    return model.split(":", 1)[-1].replace(":", "_")
+
+
 def recheck(model: str) -> None:
     """Recompute the deterministic citation checks in saved runs (no API calls)."""
     import json
@@ -247,13 +327,18 @@ def recheck(model: str) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("cmd", choices=["multibook", "spotcheck", "recheck"])
+    p.add_argument("cmd", choices=["multibook", "spotcheck", "recheck", "qa-md"])
     p.add_argument("--model", default=f"openai:{config.OPENAI_MODEL}")
     args = p.parse_args()
     config.set_profile("library")
     REPORTS.mkdir(parents=True, exist_ok=True)
     if args.cmd == "recheck":
         recheck(args.model)
+        return
+    if args.cmd == "qa-md":
+        out = REPORTS / f"All_17_books_40_QA_results_{model_tag_short(args.model)}.md"
+        out.write_text(build_qa_md(args.model), encoding="utf-8")
+        print(f"Wrote {out}")
         return
     if args.cmd == "multibook":
         out = REPORTS / f"multibook_{dt.date.today().isoformat()}.md"
