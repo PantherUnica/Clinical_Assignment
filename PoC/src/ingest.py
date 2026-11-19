@@ -132,19 +132,11 @@ def chunk_pages(
 
     units: list[tuple[int, str, int]] = []  # (page, sentence, tokens)
     for page_number, page_text in pages:
-        for sentence in _split_sentences(page_text):
-            for piece in _token_slices(sentence, chunk_size):
-                piece = piece.strip()
-                if piece:
-                    units.append((page_number, piece, count_tokens(piece)))
+        for piece, tokens in split_units(page_text, chunk_size):
+            units.append((page_number, piece, tokens))
 
     chunks: list[dict] = []
-    start = 0
-    while start < len(units):
-        end, total = start, 0
-        while end < len(units) and total < chunk_size:
-            total += units[end][2]
-            end += 1
+    for start, end, total in pack_windows([u[2] for u in units], chunk_size, overlap):
         window = units[start:end]
         chunks.append(
             {
@@ -156,15 +148,42 @@ def chunk_pages(
                 "token_count": total,
             }
         )
-        if end >= len(units):
+    return chunks
+
+
+def split_units(text: str, chunk_size: int) -> list[tuple[str, int]]:
+    """Text -> [(sentence-or-slice, tokens)], the units that chunks are packed from."""
+    out = []
+    for sentence in _split_sentences(text):
+        for piece in _token_slices(sentence, chunk_size):
+            piece = piece.strip()
+            if piece:
+                out.append((piece, count_tokens(piece)))
+    return out
+
+
+def pack_windows(token_counts: list[int], chunk_size: int, overlap: int) -> list[tuple[int, int, int]]:
+    """Greedy packing shared by both profiles: [(start, end, tokens)] unit windows.
+
+    Each window takes units until it reaches chunk_size tokens; the next window
+    steps back far enough to repeat ~overlap tokens.
+    """
+    windows = []
+    start, n = 0, len(token_counts)
+    while start < n:
+        end, total = start, 0
+        while end < n and total < chunk_size:
+            total += token_counts[end]
+            end += 1
+        windows.append((start, end, total))
+        if end >= n:
             break
-        # Step back far enough to repeat ~overlap tokens in the next chunk.
         back, cursor = 0, end
         while cursor > start + 1 and back < overlap:
             cursor -= 1
-            back += units[cursor][2]
+            back += token_counts[cursor]
         start = cursor if cursor > start else end
-    return chunks
+    return windows
 
 
 def ingest_all(books_dir: Path | str | None = None) -> list[dict]:
@@ -210,7 +229,19 @@ def load_chunks(path: Path | str | None = None) -> list[dict]:
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Extract book text.")
+    parser.add_argument("--profile", choices=["eval2", "library"], default="eval2")
+    parser.add_argument("--only", nargs="*", help="library: only these book_ids")
+    parser.add_argument("--force", action="store_true", help="library: re-extract even if cached")
+    args = parser.parse_args()
     config.ensure_dirs()
+    if args.profile == "library":
+        from . import library
+
+        library.extract_all(only=args.only, force=args.force)
+        raise SystemExit(0)
     produced = ingest_all()
     destination = write_chunks(produced)
     print(f"\nWrote {len(produced):,} chunks to {destination}")

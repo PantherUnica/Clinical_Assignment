@@ -7,7 +7,7 @@ unsupported answer can be produced.
 
 from __future__ import annotations
 
-from . import llm
+from . import cite, llm
 
 NO_EVIDENCE = (
     "I could not find evidence in the indexed books to support an answer to this question. "
@@ -51,17 +51,21 @@ def build_citations(verified: list[dict], passages: list[dict]) -> tuple[list[di
             passage = by_id[chunk_id]
             marker = len(citations) + 1
             marker_by_id[chunk_id] = marker
-            citations.append(
-                {
-                    "marker": marker,
-                    "chunk_id": chunk_id,
-                    "book_title": passage["book_title"],
-                    "page": passage["page"],
-                    "page_end": passage["page_end"],
-                    "text": passage["text"],
-                    "similarity": passage.get("similarity"),
-                }
-            )
+            citation = {
+                "marker": marker,
+                "chunk_id": chunk_id,
+                "book_title": passage["book_title"],
+                "page": passage["page"],
+                "page_end": passage["page_end"],
+                "text": passage["text"],
+                "similarity": passage.get("similarity"),
+            }
+            # Library profile: chapter / section / printed page travel with the citation.
+            for key in ("book_id", "edition", "chapter", "section", "printed_page", "printed_page_end", "ocr"):
+                if key in passage:
+                    citation[key] = passage[key]
+            citation["label"] = cite.source_label(citation)
+            citations.append(citation)
     return citations, marker_by_id
 
 

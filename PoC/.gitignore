@@ -1,10 +1,13 @@
 .env
 books/*
 !books/.gitkeep
+!books/library_manifest.json
 data/chunks.jsonl
 data/index/
+data/library/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .venv/
 venv/
+backups/

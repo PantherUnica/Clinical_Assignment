@@ -39,6 +39,52 @@ This extracts text from the PDFs (OCR fallback for scanned pages), chunks it, em
 chunk, and writes a persistent vector store to `data/index/`. It prints the chunk maths as
 it goes so you can see what happened.
 
+## 2b · The full 17-book library (`--profile library`)
+
+There are two knowledge bases, kept separate so the 2-book baseline stays comparable:
+
+| Profile | Books | Index | Collection |
+| --- | --- | --- | --- |
+| `eval2` (default) | BSAVA + Blackwell's Canine & Feline | `data/index/` | `vetai_books` |
+| `library` | all 17 books in `books/library_manifest.json` | `data/library/index/` | `vetai_library` |
+
+Pick one with `--profile` on any command, `KB_PROFILE=library` in `.env`, or the
+"Knowledge base" switch in the Streamlit sidebar.
+
+```bash
+python -m src.ingest --profile library        # 1. PDFs -> cleaned pages (+OCR), data/library/pages/
+python -m src.audit_books                     #    -> reports/book_audit.md
+python -m src.embed_index --profile library   # 2. chunk + embed; resumable - re-run after a crash
+python -m src.smoke_test                      # 3. retrieval sanity check -> reports/smoke_test_library.md
+python -m src.backup create library17 --profile library
+```
+
+- **Book list** - `books/library_manifest.json` gives each book a clean title and edition;
+  `skip: true` leaves a file out (the duplicate WSAVA PDF) without deleting it.
+- **Cleaning** - running headers/footers and bare page numbers are removed; Index,
+  Contents, Copyright, Contributors and blank pages are dropped. Details per book in
+  `reports/book_audit.md`.
+- **Metadata on every chunk** - book, edition, chapter, section, PDF page, *printed* page,
+  and `ocr: true` for text that came from OCR. Chunks never cross a chapter boundary.
+- **Citations** read `Book, Chapter › Section, p. 580`; when a book prints no page numbers
+  (Ettinger) they say `PDF p. 1149` so a PDF page is never passed off as a book page.
+- **Resumable** - extraction skips books already done, OCR is cached per page, and the
+  index build only embeds chunks whose text or metadata changed.
+- **Per-book cap** - `MAX_PER_BOOK=3` (or `--max-per-book 3`) stops one big book filling
+  the whole top-k. Off by default.
+
+## Backups
+
+```bash
+python -m src.backup create <name> [--profile library]   # -> backups/vector_store/<date>_<name>/
+python -m src.backup list
+python -m src.backup verify <folder>
+python -m src.backup restore <folder> [--force]          # --force moves the current copy aside
+```
+
+Each backup holds `index.zip`, `chunks.zip` and a `manifest.json` (embedding model, chunk
+settings, per-book counts, PDF hashes, zip checksums). Backups live on this disk only.
+
 ## 3 · Run it
 
 **Notebook** - see every stage, one at a time:
@@ -62,6 +108,7 @@ URL can leave you looking at a different (older) copy of the app.
 
 ```bash
 python -m src.pipeline "What are the common causes of chronic kidney disease in cats?"
+python -m src.pipeline --profile library "What is the dose of meloxicam in cats?"
 ```
 
 ---
@@ -223,16 +270,18 @@ not complete - read the second line for what to do.
 check the retrieved passages in the notebook to see whether retrieval found the right pages
 at all. Diagnose before loosening the gate.
 
-## OCR (optional)
+## OCR
 
-Scanned/image pages need OCR:
+Scanned/image pages need OCR (required for the library: Muller & Kirk is fully scanned):
 
 ```bash
 pip install pytesseract pillow
+winget install UB-Mannheim.TesseractOCR      # Windows; set TESSERACT_CMD if installed elsewhere
 ```
 
-plus the Tesseract binary on your OS. Without it, image-only pages are skipped with a
-warning and text pages still work.
+The library profile OCRs in parallel (`OCR_WORKERS`, `OCR_DPI=300`) and caches each page
+in `data/library/ocr_cache/`, so it runs once. Without Tesseract the eval2 build skips
+image-only pages with a warning; the library build stops and says which book needs it.
 
 ---
 

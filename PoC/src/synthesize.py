@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import config
 
-from . import llm
+from . import cite, llm
 
 SYSTEM = (
     "You are a veterinary evidence analyst. You answer ONLY from the passages you are given. "
@@ -52,10 +52,13 @@ Rules:
 def _format_passages(passages: list[dict]) -> str:
     blocks = []
     for passage in passages:
-        header = (
-            f"[chunk_id: {passage['chunk_id']}] "
-            f"({passage['book_title']}, p.{passage['page']})"
+        # Eval2 passages keep the original header so the 2-book baseline prompt is unchanged.
+        source = (
+            cite.source_label(passage)
+            if cite.is_library(passage)
+            else f"{passage['book_title']}, p.{passage['page']}"
         )
+        header = f"[chunk_id: {passage['chunk_id']}] ({source})"
         blocks.append(f"{header}\n{passage['text']}")
     return "\n\n---\n\n".join(blocks)
 

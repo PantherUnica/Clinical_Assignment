@@ -16,10 +16,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 
 import config
-from src import pipeline
+from src import cite, pipeline
 from src.embed_index import get_collection
 
 st.set_page_config(page_title="VetAI PoC", layout="wide")
+
+# Which knowledge base to search. Chosen in the sidebar; applied before anything
+# touches the index, because Streamlit reruns this whole script on every click.
+_PROFILE_LABELS = {
+    "library": "All 17 books (library)",
+    "eval2": "2 eval books (BSAVA + Blackwell's)",
+}
+_default_profile = config.KB_PROFILE if config.KB_PROFILE in _PROFILE_LABELS else "library"
+profile = st.session_state.get("kb_profile", "library" if config.LIBRARY_INDEX_DIR.exists() else _default_profile)
+config.set_profile(profile)
 
 
 # --- Resources -------------------------------------------------------------
@@ -29,13 +39,15 @@ st.set_page_config(page_title="VetAI PoC", layout="wide")
 
 
 @st.cache_resource(show_spinner=False)
-def _collection():
+def _collection(profile: str):
+    # profile is part of the cache key: one cached client per knowledge base.
+    config.set_profile(profile)
     return get_collection()
 
 
 @st.cache_data(ttl=30, show_spinner=False)
-def _index_count() -> int:
-    return _collection().count()
+def _index_count(profile: str) -> int:
+    return _collection(profile).count()
 
 
 def _explain(exc: Exception) -> tuple[str, str]:
@@ -70,15 +82,10 @@ def _explain(exc: Exception) -> tuple[str, str]:
     if "index" in lowered and ("empty" in lowered or "not found" in lowered):
         return (
             "The vector index is missing or empty.",
-            "Build it from the PoC folder with `python -m src.embed_index`.",
+            "Build it from the PoC folder with `python -m src.embed_index --profile "
+            f"{config.KB_PROFILE}`.",
         )
     return (f"{name}: {text}", "")
-
-
-def _pages(citation: dict) -> str:
-    if citation["page"] == citation["page_end"]:
-        return f"p.{citation['page']}"
-    return f"pp.{citation['page']}-{citation['page_end']}"
 
 
 # --- Header ----------------------------------------------------------------
@@ -93,6 +100,13 @@ settings = config.summary()
 
 with st.sidebar:
     st.header("Configuration")
+    st.radio(
+        "Knowledge base",
+        options=list(_PROFILE_LABELS),
+        format_func=_PROFILE_LABELS.get,
+        key="kb_profile",
+        index=list(_PROFILE_LABELS).index(profile),
+    )
     st.markdown(f"**LLM** &nbsp; `{settings['llm_provider']}` / `{settings['llm_model']}`")
     st.markdown(
         f"**Embeddings** &nbsp; `{settings['embed_provider']}` / `{settings['embed_model']}`"
@@ -108,14 +122,19 @@ with st.sidebar:
         "Verification threshold", 0.0, 1.0, float(settings["verify_threshold"]), 0.01
     )
     st.caption("Raise the threshold to be stricter about what counts as supported evidence.")
+    max_per_book = st.number_input(
+        "Max passages per book (0 = no cap)", min_value=0, max_value=20,
+        value=int(settings["max_per_book"]), step=1,
+    )
+    st.caption("A cap stops one large book (e.g. Ettinger) from filling every slot.")
 
     st.divider()
     try:
-        indexed = _index_count()
+        indexed = _index_count(profile)
         if indexed:
-            st.success(f"Index ready: {indexed:,} chunks")
+            st.success(f"Index ready: {indexed:,} chunks ({profile})")
         else:
-            st.error("Index is empty. Run `python -m src.embed_index`")
+            st.error(f"Index is empty. Run `python -m src.embed_index --profile {profile}`")
     except Exception as exc:
         headline, remedy = _explain(exc)
         st.error(headline)
@@ -145,6 +164,7 @@ if submitted:
                     top_k=top_k,
                     threshold=threshold,
                     on_stage=status.write,
+                    max_per_book=int(max_per_book),
                 )
             except Exception as exc:
                 status.update(label="Failed", state="error", expanded=False)
@@ -160,7 +180,7 @@ if submitted:
                 # moving a slider or opening a panel must not wipe it.
                 st.session_state["result"] = result
                 st.session_state["error"] = None
-                st.session_state["settings_used"] = (top_k, threshold)
+                st.session_state["settings_used"] = (profile, top_k, threshold, int(max_per_book))
 
 # --- Render from state, never from the submit event ------------------------
 
@@ -174,10 +194,11 @@ result = st.session_state.get("result")
 
 if result:
     used = st.session_state.get("settings_used")
-    if used and used != (top_k, threshold):
+    if used and used != (profile, top_k, threshold, int(max_per_book)):
         st.warning(
-            f"Settings changed since this answer was produced (it used top-k {used[0]}, "
-            f"threshold {used[1]:.2f}). Press Ask to apply the new ones."
+            f"Settings changed since this answer was produced (it used knowledge base "
+            f"{used[0]}, top-k {used[1]}, threshold {used[2]:.2f}, max per book {used[3]}). "
+            "Press Ask to apply the new ones."
         )
 
     st.divider()
@@ -201,12 +222,17 @@ if result:
         st.subheader("Sources")
         st.caption("Open a citation to read the exact passage the claim came from.")
         for citation in result["citations"]:
-            label = f"[{citation['marker']}] {citation['book_title']} - {_pages(citation)}"
+            label = f"[{citation['marker']}] {citation['label']}"
             with st.expander(label):
                 st.markdown(f"> {citation['text']}")
+                extra = ""
+                if cite.is_library(citation):
+                    extra = f" | PDF page {citation['page']}"
+                    if citation.get("ocr"):
+                        extra += " | from OCR (scanned page - may contain spelling errors)"
                 st.caption(
                     f"chunk_id `{citation['chunk_id']}` | "
-                    f"retrieval similarity {citation['similarity']}"
+                    f"retrieval similarity {citation['similarity']}{extra}"
                 )
 
     if result["rejected"]:
@@ -227,7 +253,7 @@ if result:
         for passage in result["passages"]:
             st.markdown(
                 f"**{passage['similarity']}** - `{passage['chunk_id']}` - "
-                f"{passage['book_title']}, p.{passage['page']}"
+                f"{cite.source_label(passage)}"
             )
             st.caption(passage["text"][:400] + ("..." if len(passage["text"]) > 400 else ""))
 

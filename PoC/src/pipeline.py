@@ -25,6 +25,7 @@ def answer_question(
     top_k: int | None = None,
     threshold: float | None = None,
     on_stage: Callable[[str], None] | None = None,
+    max_per_book: int | None = None,
 ) -> dict:
     """Run the pipeline end to end.
 
@@ -35,7 +36,7 @@ def answer_question(
     report = on_stage or (lambda _label: None)
 
     report("Retrieving passages from the books")
-    passages = retrieve_stage.retrieve(question, top_k=top_k)
+    passages = retrieve_stage.retrieve(question, top_k=top_k, max_per_book=max_per_book)
 
     report(f"Reading {len(passages)} passages and extracting claims")
     synthesis = synthesize_stage.synthesize(question, passages)
@@ -70,12 +71,7 @@ def format_result(result: dict) -> str:
     if result["citations"]:
         lines.append("Sources")
         for citation in result["citations"]:
-            pages = (
-                f"p.{citation['page']}"
-                if citation["page"] == citation["page_end"]
-                else f"pp.{citation['page']}-{citation['page_end']}"
-            )
-            lines.append(f"  [{citation['marker']}] {citation['book_title']}, {pages}")
+            lines.append(f"  [{citation['marker']}] {citation['label']}")
     if result["rejected"]:
         lines.append("")
         lines.append(f"Dropped by the verification gate ({len(result['rejected'])}):")
@@ -90,10 +86,17 @@ def format_result(result: dict) -> str:
 
 
 if __name__ == "__main__":
-    import sys
+    import argparse
 
-    question = " ".join(sys.argv[1:]).strip()
-    if not question:
-        question = input("Clinical question: ").strip()
-    print()
-    print(format_result(answer_question(question)))
+    parser = argparse.ArgumentParser(description="Ask the VetAI pipeline a clinical question.")
+    parser.add_argument("question", nargs="*", help="the question (prompted for if omitted)")
+    parser.add_argument("--profile", choices=list(config.PROFILES), default=config.KB_PROFILE,
+                        help="eval2 = the 2 eval books, library = all 17 books")
+    parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument("--max-per-book", type=int, default=None, help="0 = no cap")
+    args = parser.parse_args()
+    config.set_profile(args.profile)
+
+    question = " ".join(args.question).strip() or input("Clinical question: ").strip()
+    print(f"[knowledge base: {config.KB_PROFILE}]\n")
+    print(format_result(answer_question(question, top_k=args.top_k, max_per_book=args.max_per_book)))

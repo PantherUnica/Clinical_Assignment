@@ -1,0 +1,23 @@
+{
+  "_note": "One entry per book in the full library (KB_PROFILE=library). 'file' is relative to PoC/books/. skip=true keeps a file out of the index without deleting it. 'force_ocr' OCRs every page (for fully scanned books).",
+  "books": [
+    {"book_id": "bsava-formulary", "title": "BSAVA Small Animal Formulary", "edition": "6th edition", "file": "BSAVA_formulations_document.pdf"},
+    {"book_id": "blackwell-5min-canine-feline", "title": "Blackwell's Five-Minute Veterinary Consult: Canine and Feline", "edition": "6th edition", "file": "Blackwell's Five-Minute Veterinary Consult - Canine and Feline .pdf"},
+    {"book_id": "applied-pharmacology-vet-tech", "title": "Applied Pharmacology for Veterinary Technicians", "edition": "6th edition", "file": "books_library/Applied Pharmacology for Veterinary Technicians, 6th Edition (1).pdf"},
+    {"book_id": "blackwell-5min-dermatology", "title": "Blackwell's Five-Minute Veterinary Consult Clinical Companion: Small Animal Dermatology", "edition": "", "file": "books_library/Blackwell's Five-Minute Veterinary Consult Clinical Companion _ Small Animal Dermatology ( PDFDrive ).pdf"},
+    {"book_id": "ettinger-internal-medicine", "title": "Ettinger's Textbook of Veterinary Internal Medicine", "edition": "9th edition", "file": "books_library/Ettinger’s Textbook of Veterinary Internal Medicine, 9th Edition.pdf"},
+    {"book_id": "muller-kirk-dermatology", "title": "Muller and Kirk's Small Animal Dermatology", "edition": "6th edition", "file": "books_library/Muller and Kirk's Small Animal Dermatology, 6th Edition ( PDFDrive ).pdf", "force_ocr": true},
+    {"book_id": "plumbs-drug-handbook", "title": "Plumb's Veterinary Drug Handbook", "edition": "7th edition", "file": "books_library/Plumbs Veterinary drug handbook.pdf"},
+    {"book_id": "radiography-dog-cat", "title": "Radiography of the Dog and Cat: Guide to Making and Interpreting Radiographs", "edition": "2nd edition", "file": "books_library/Radiography of the Dog and Cat Guide to Making and Interpreting Radiographs, 2nd Edition (VetBooks.ir).pdf"},
+    {"book_id": "saunders-solutions-dermatology", "title": "Saunders Solutions in Veterinary Practice: Small Animal Dermatology", "edition": "1st edition", "file": "books_library/Saunders Solutions in Veterinary Practice_ Small Animal Dermatology, 1e ( PDFDrive ).pdf"},
+    {"book_id": "saunders-vet-dictionary", "title": "Saunders Comprehensive Veterinary Dictionary", "edition": "5th edition", "file": "books_library/Saunders-Comprehensive-Veterinary-Dictionary-5th-Edition.pdf"},
+    {"book_id": "slatter-ophthalmology", "title": "Slatter's Fundamentals of Veterinary Ophthalmology", "edition": "6th edition", "file": "books_library/Slatter's Fundamentals of Veterinary Ophthalmology, 6th Edition (VetBooks.ir).pdf"},
+    {"book_id": "dermatology-color-atlas", "title": "Small Animal Dermatology: A Color Atlas and Therapeutic Guide", "edition": "2nd edition", "file": "books_library/Small Animal Dermatology_ A Color Atlas and Therapeutic Guide Second Edition.pdf"},
+    {"book_id": "differential-diagnosis-lists", "title": "Small Animal Medical Differential Diagnosis: A Book of Lists", "edition": "2nd edition", "file": "books_library/Small Animal Medical Differential Diagnosis - A Book of Lists,.pdf"},
+    {"book_id": "fossum-small-animal-surgery", "title": "Small Animal Surgery (Fossum)", "edition": "4th edition", "file": "books_library/Small Animal Surgery.pdf"},
+    {"book_id": "merck-vet-manual", "title": "The Merck Veterinary Manual", "edition": "11th edition", "file": "books_library/The-Merck-Veterinary-Manual-11th-Edition.pdf"},
+    {"book_id": "wsava-essential-medicines", "title": "WSAVA List of Essential Medicines for Cats and Dogs", "edition": "2020", "file": "books_library/WSAVA_List_of_Essential_Medicines_for_Cats_and_Dogs_final.pdf"},
+    {"book_id": "wsava-essential-medicines-dup", "title": "Veterinary Drug Index 3 by WSAVA", "edition": "", "file": "books_library/Veterinary Drug Index 3 by WSAVA.pdf", "skip": true, "skip_reason": "byte-identical duplicate of WSAVA_List_of_Essential_Medicines_for_Cats_and_Dogs_final.pdf"},
+    {"book_id": "vaccination-schedule", "title": "Veterinary Vaccination Schedule", "edition": "", "file": "books_library/Veterinary Vaccination Schedule.pdf"}
+  ]
+}
